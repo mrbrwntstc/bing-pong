@@ -1,15 +1,12 @@
-#include "snek/render.h"
+#include "snek/game.h"
 
 int main()
 {
-  GLFWwindow* game_window = render_init();
-  while(!glfwWindowShouldClose(game_window)) {
-    glfwPollEvents();
-    glfwSwapBuffers(game_window);
-  }
+  game_init();
+  
+  game_run();
 
-  glfwDestroyWindow(game_window);
-  glfwTerminate();
+  game_cleanup();
 
   return 0;
 }
