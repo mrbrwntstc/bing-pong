@@ -6,12 +6,14 @@ find_path(LINMATH_INCLUDE_DIRS "linmath.h/linmath.h")
 
 add_library(snek_lib STATIC
   "game.h"
+  "io.h"
   "render.h"
   "types.h"
   "util.h"
 )
 
 add_subdirectory(game)
+add_subdirectory(io)
 add_subdirectory(render)
 
 target_include_directories(snek_lib
