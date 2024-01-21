@@ -4,6 +4,7 @@
 #include "../render.h"
 #include "../types.h"
 #include "../util.h"
+#include "../io.h"
 
 #pragma region window_dimensions
 static const game_window_width = 1280;
@@ -99,15 +100,106 @@ GLFWwindow* render_init()
   glBindVertexArray(0);
   #pragma endregion
 
+  #pragma region render_init_texture_color
+  glGenTextures(1, &texture_color);
+  glBindTexture(GL_TEXTURE_2D, texture_color);
+
+  u8 solid_white[4] = {255, 255, 255, 255};
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, solid_white);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  #pragma endregion
+
+  #pragma region render_init_shaders
+  i32 success;
+  char log[512];
+  #pragma region create_vertex_shader
+  snek_file file_vertex = io_file_read("shaders/default.vert");
+  if(!file_vertex.is_valid)
+    ERROR_EXIT("Failed to read shaders/default.vert\n");
+  u32 shader_vertex = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(shader_vertex, 1, (const char**)&file_vertex.data, NULL);
+  glCompileShader(shader_vertex);
+  glGetShaderiv(shader_vertex, GL_COMPILE_STATUS, &success);
+  if(!success) {
+    free(file_vertex.data);
+    glGetShaderInfoLog(shader_vertex, 512, NULL, log);
+    ERROR_EXIT("Failed to compile vertex shader: %s\n", log);
+  }
+  free(file_vertex.data);
+  #pragma endregion
+
+  #pragma region create_fragment_shader
+  snek_file file_fragment = io_file_read("shaders/default.frag");
+  if(!file_fragment.is_valid)
+    ERROR_EXIT("Failed to read shaders/default.frag\n");
+  u32 shader_fragment = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(shader_fragment, 1, (const char**)&file_fragment.data, NULL);
+  glCompileShader(shader_fragment);
+  glGetShaderiv(shader_fragment, GL_COMPILE_STATUS, &success);
+  if(!success) {
+    free(file_fragment.data);
+    glGetShaderInfoLog(shader_fragment, 512, NULL, log);
+    ERROR_EXIT("Failed to compile fragment shader: %s\n", log);
+  }
+  free(file_fragment.data);
+  #pragma endregion
+
+  #pragma region link_vertex_fragment
+  shader_default = glCreateProgram();
+  glAttachShader(shader_default, shader_vertex);
+  glAttachShader(shader_default, shader_fragment);
+  glLinkProgram(shader_default);
+  glGetProgramiv(shader_default, GL_LINK_STATUS, &success);
+  if(!success) {
+    glGetProgramInfoLog(shader_default, 512, NULL, log);
+    ERROR_EXIT("Failed to link shader program: %s\n", log);
+  }
+  glDeleteShader(shader_vertex);
+  glDeleteShader(shader_fragment);
+  #pragma endregion
+  
+
+  { // initialize projection matrix for shader_default
+    mat4x4 projection;
+    mat4x4_ortho(projection, 0.0f, game_window_width, 0.0f, game_window_height, -1.0f, 1.0f);
+
+    glUseProgram(shader_default);
+    glUniformMatrix4fv(glGetUniformLocation(shader_default, "projection"), 1, GL_FALSE, &projection[0][0]);
+  }
+  #pragma endregion
+
   return game_window;
 }
 
 void render_quad(vec2 pos, vec2 size, vec4 color)
 {
+  glUseProgram(shader_default);
+
+  mat4x4 model;
+  mat4x4_identity(model);
+  mat4x4_translate(model, pos[0], pos[1], 0.0f);
+  mat4x4_scale_aniso(model, model, size[0], size[1], 1.0f);
+
+  glUniformMatrix4fv(glGetUniformLocation(shader_default, "model"), 1, GL_FALSE, &model[0][0]);
+  glUniform4fv(glGetUniformLocation(shader_default, "color"), 1, &color[0]);
+
   glBindVertexArray(vao_quad);
   
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glBindTexture(GL_TEXTURE_2D, texture_color);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
   glBindVertexArray(0);
+}
+
+void render_begin()
+{
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void render_end(GLFWwindow* game_window)
+{
+  glfwPollEvents();
+  glfwSwapBuffers(game_window);
 }

@@ -9,10 +9,7 @@ GLFWwindow* game_init()
 
 void game_run(GLFWwindow* game_window)
 {
-  #pragma region render_begin
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-  #pragma endregion
+  render_begin();
 
   #pragma region game_update
   #pragma endregion
@@ -25,8 +22,5 @@ void game_run(GLFWwindow* game_window)
   );
   #pragma endregion
 
-  #pragma region render_end
-  glfwPollEvents();
-  glfwSwapBuffers(game_window);
-  #pragma endregion
+  render_end(game_window);
 }
