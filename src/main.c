@@ -2,13 +2,11 @@
 
 int main()
 {
-  GLFWwindow* game_window = game_init();
+  game_init();
   
-  while(!glfwWindowShouldClose(game_window))
-    game_run(game_window);
+  game_loop();
 
-  glfwDestroyWindow(game_window);
-  glfwTerminate();
+  game_cleanup();
 
   return 0;
 }

@@ -11,4 +11,6 @@ void render_begin();
 void render_end(GLFWwindow* game_window);
 void render_quad(vec2 pos, vec2 size, vec4 color);
 
+void render_cleanup(GLFWwindow* game_window);
+
 #endif // __SNEK_RENDER_H__

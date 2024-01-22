@@ -6,8 +6,12 @@ find_path(LINMATH_INCLUDE_DIRS "linmath.h/linmath.h")
 
 add_library(snek_lib STATIC
   "game.h"
+  "global_variables.c"
+  "global_variables.h"
+  "input.h"
   "io.h"
   "render.h"
+  "time.h"
   "types.h"
   "util.h"
 )
@@ -15,6 +19,7 @@ add_library(snek_lib STATIC
 add_subdirectory(game)
 add_subdirectory(io)
 add_subdirectory(render)
+add_subdirectory(time)
 
 target_include_directories(snek_lib
 PRIVATE
@@ -22,7 +27,7 @@ PRIVATE
 )
 
 target_link_libraries(snek_lib
-  PUBLIC
+PRIVATE
     glad::glad
     glfw
 )

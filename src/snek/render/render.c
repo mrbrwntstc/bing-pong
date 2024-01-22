@@ -5,11 +5,7 @@
 #include "../types.h"
 #include "../util.h"
 #include "../io.h"
-
-#pragma region window_dimensions
-static const game_window_width = 1280;
-static const game_window_height = 960;
-#pragma endregion
+#include "../global_variables.h"
 
 #pragma region shader_variables
 
@@ -29,13 +25,19 @@ static void glfw_error_callback(i32 error, const char* description)
 
 static void glfw_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+  global_vars.input.left = (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT));
+  global_vars.input.right = (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT));
+  global_vars.input.up = (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT));
+  global_vars.input.down = (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT));
+
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+      glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
 static void glfw_framebuffer_size_callback(GLFWwindow* window, i32 width, i32 height)
 {
     glViewport(0, 0, width, height);
+
 }
 #pragma endregion
 
@@ -50,7 +52,9 @@ GLFWwindow* render_init()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow* game_window = glfwCreateWindow(game_window_width, game_window_height, "Snek", NULL, NULL);
+  global_vars.game_window_width = 1280;
+  global_vars.game_window_height = 960;
+  GLFWwindow* game_window = glfwCreateWindow(global_vars.game_window_width, global_vars.game_window_height, "Snek", NULL, NULL);
   if (!game_window) {
     glfwTerminate();
     ERROR_EXIT("Failed to create game window\n");
@@ -162,7 +166,7 @@ GLFWwindow* render_init()
 
   { // initialize projection matrix for shader_default
     mat4x4 projection;
-    mat4x4_ortho(projection, 0.0f, game_window_width, 0.0f, game_window_height, -1.0f, 1.0f);
+    mat4x4_ortho(projection, 0.0f, global_vars.game_window_width, 0.0f, global_vars.game_window_height, -1.0f, 1.0f);
 
     glUseProgram(shader_default);
     glUniformMatrix4fv(glGetUniformLocation(shader_default, "projection"), 1, GL_FALSE, &projection[0][0]);
@@ -202,4 +206,10 @@ void render_end(GLFWwindow* game_window)
 {
   glfwPollEvents();
   glfwSwapBuffers(game_window);
+}
+
+void render_cleanup(GLFWwindow* game_window)
+{
+  glfwDestroyWindow(game_window);
+  glfwTerminate();
 }
