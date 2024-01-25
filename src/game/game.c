@@ -32,13 +32,16 @@ void game_loop()
     } else if(engine_input_state.down) {
       direction[0] = 0;
       direction[1] = 1;
-    } 
+    }
 
     // the snake needs to look like it's traveling in a grid
     move_counter++;
     if(move_counter >= move_period) {
       move_counter = 0;
-      game_board_col_row snake_head_next_col_row = game_snake_head_next_col_row(snake, direction);
+      if(engine_input_state.grow) {
+        game_snake_grow(snake);
+      }
+      game_snake_move(snake, direction);
     }
     
     // draw

@@ -68,6 +68,7 @@ typedef struct input_state_t
   bool right;
   bool up;
   bool down;
+  bool grow;
 } input_state;
 
 extern input_state engine_input_state;

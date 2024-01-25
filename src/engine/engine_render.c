@@ -22,6 +22,7 @@ static void glfw_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 act
   engine_input_state.right = (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT));
   engine_input_state.up = (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT));
   engine_input_state.down = (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT));
+  engine_input_state.grow = (key == GLFW_KEY_G && (action == GLFW_PRESS || action == GLFW_REPEAT));
 
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
       glfwSetWindowShouldClose(window, GLFW_TRUE);

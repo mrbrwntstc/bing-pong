@@ -25,7 +25,8 @@ typedef struct game_snake_segment_t {
 } game_snake_segment;
 
 array_list* game_snake_init();
-game_board_col_row game_snake_head_next_col_row(array_list* snake, vec2 direction);
+void game_snake_grow(array_list* snake);
+void game_snake_move(array_list* snake, vec2 direction);
 void game_snake_draw(array_list* snake);
 
 #pragma endregion
