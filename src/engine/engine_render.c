@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "../render.h"
-#include "../types.h"
-#include "../util.h"
-#include "../io.h"
-#include "../global_variables.h"
+#include "../engine.h"
 
 #pragma region shader_variables
 
@@ -25,10 +18,10 @@ static void glfw_error_callback(i32 error, const char* description)
 
 static void glfw_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods)
 {
-  global_vars.input.left = (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT));
-  global_vars.input.right = (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT));
-  global_vars.input.up = (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT));
-  global_vars.input.down = (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT));
+  engine_input_state.left = (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT));
+  engine_input_state.right = (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT));
+  engine_input_state.up = (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT));
+  engine_input_state.down = (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT));
 
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
       glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -37,7 +30,6 @@ static void glfw_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 act
 static void glfw_framebuffer_size_callback(GLFWwindow* window, i32 width, i32 height)
 {
     glViewport(0, 0, width, height);
-
 }
 #pragma endregion
 
@@ -51,10 +43,10 @@ GLFWwindow* render_init()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  // window not resizable
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-  global_vars.game_window_width = 1280;
-  global_vars.game_window_height = 960;
-  GLFWwindow* game_window = glfwCreateWindow(global_vars.game_window_width, global_vars.game_window_height, "Snek", NULL, NULL);
+  GLFWwindow* game_window = glfwCreateWindow(game_window_width, game_window_height, "Snek", NULL, NULL);
   if (!game_window) {
     glfwTerminate();
     ERROR_EXIT("Failed to create game window\n");
@@ -72,15 +64,15 @@ GLFWwindow* render_init()
 
   #pragma region render_init_quad
   f32 vertices[] = {
-     0.5,  0.5, 0, 0, 0,
-     0.5, -0.5, 0, 0, 1,
-    -0.5, -0.5, 0, 1, 1,
-    -0.5,  0.5, 0, 1, 0
+    0, 1, 0, 0, 1,
+    1, 0, 0, 1, 0,
+    1, 1, 0, 1, 1,
+    0, 0, 0, 0, 0,
   };
 
   u32 indices[] = {
       0, 1, 3,
-      1, 2, 3
+      0, 1, 2
   };
 
   glGenVertexArrays(1, &vao_quad);
@@ -115,6 +107,7 @@ GLFWwindow* render_init()
   #pragma endregion
 
   #pragma region render_init_shaders
+
   i32 success;
   char log[512];
   #pragma region create_vertex_shader
@@ -163,14 +156,16 @@ GLFWwindow* render_init()
   glDeleteShader(shader_fragment);
   #pragma endregion
   
+  #pragma region initialization_projection_matrix
 
-  { // initialize projection matrix for shader_default
-    mat4x4 projection;
-    mat4x4_ortho(projection, 0.0f, global_vars.game_window_width, 0.0f, global_vars.game_window_height, -1.0f, 1.0f);
+  mat4x4 projection;
+  mat4x4_ortho(projection, 0.0f, game_window_width, game_window_height, 0.0f, -1.0f, 1.0f);
 
-    glUseProgram(shader_default);
-    glUniformMatrix4fv(glGetUniformLocation(shader_default, "projection"), 1, GL_FALSE, &projection[0][0]);
-  }
+  glUseProgram(shader_default);
+  glUniformMatrix4fv(glGetUniformLocation(shader_default, "projection"), 1, GL_FALSE, &projection[0][0]);
+  
+  #pragma endregion
+
   #pragma endregion
 
   return game_window;

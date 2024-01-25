@@ -1,4 +1,0 @@
-target_sources(snek_lib
-PRIVATE
-  "render.c"
-)
