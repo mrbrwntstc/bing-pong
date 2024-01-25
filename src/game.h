@@ -5,21 +5,27 @@
 
 #pragma region game_board
 
-const u32 game_board_cell_dimension = 40; // 40x40
-const u32 game_board_columns = 32; // 32 * 40 = 1280
-const u32 game_board_rows = 24;;   // 24 * 40 = 960
+typedef struct game_board_col_row_t {
+  u32 col;
+  u32 row;
+} game_board_col_row;
+
+extern u32 game_board_dimension;
+extern u32 game_board_cols;
+extern u32 game_board_rows;
 
 #pragma endregion
 
 #pragma region game_snake
 
 typedef struct game_snake_segment_t {
-  vec2 board_cell_coordinate;
-  vec2 direction;
+  vec2 board_col_row;
+  vec2 direction_col_row;
   vec4 color;
 } game_snake_segment;
 
-void game_snake_init(array_list *snake);
+array_list* game_snake_init();
+game_board_col_row game_snake_head_next_col_row(array_list* snake, vec2 direction);
 void game_snake_draw(array_list* snake);
 
 #pragma endregion

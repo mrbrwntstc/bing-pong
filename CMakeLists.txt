@@ -7,9 +7,11 @@ find_path(LINMATH_INCLUDE_DIRS "linmath.h/linmath.h")
 
 add_executable(${CMAKE_PROJECT_NAME}
   "src/engine.h"
+  "src/game.h"
   "src/main.c")
 
 add_subdirectory("src/engine")
+add_subdirectory("src/game")
 
 target_include_directories(${CMAKE_PROJECT_NAME}
 PRIVATE

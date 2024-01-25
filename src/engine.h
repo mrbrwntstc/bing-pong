@@ -43,6 +43,7 @@ typedef size_t usize;
 
 #pragma endregion
 
+
 #pragma region array_list
 
 typedef struct array_list_t {
@@ -92,7 +93,7 @@ extern i32 game_window_height;
 GLFWwindow* render_init();
 void render_begin();
 void render_end(GLFWwindow* game_window);
-void render_quad(vec2 pos, vec2 size, vec4 color);
+void render_quad(f32* pos, f32* size, f32* color);
 void render_cleanup(GLFWwindow* game_window);
 
 #pragma endregion
@@ -120,6 +121,8 @@ void time_update();
 void time_update_late();
 
 #pragma endregion
+
+
 
 #pragma region engine
 

@@ -1,30 +1,50 @@
 #include "../game.h"
 
-static const vec4 snake_color_head = {0.0f, 1.0f, 0.0f, 1.0f};
-static const vec4 snake_color_body = {1.0f, 1.0f, 1.0f, 1.0f};
+static const vec4 snake_head_color = {0.0f, 1.0f, 0.0f, 1.0f};
 
-void game_snake_init(array_list *snake)
+array_list* game_snake_init()
 {
-  snake = array_list_create(sizeof(game_snake_segment), 1);
-  if(!snake)
-    ERROR_EXIT("Not enough memory to create snake\n");
+  array_list* new_snake = array_list_create(sizeof(game_snake_segment), 1);
 
   game_snake_segment snake_head = {
-    .board_cell_coordinate = {random_u64(0) % game_board_columns, random_u64(0) % game_board_rows},
-    .direction = {1.0f, 0.0f},
-    .color = {snake_color_head[0], snake_color_head[1], snake_color_head[2], snake_color_head[3]},
+    .board_col_row = {0, 0},
+    .direction_col_row = {1, 0},
+    .color = {snake_head_color[0], snake_head_color[1], snake_head_color[2], snake_head_color[3]},
   };
 
-  if(!array_list_append(snake, &snake_head)) {
-    array_list_free(snake);
-    ERROR_EXIT("Not enough memory to append snake segment\n");
+  if(array_list_append(new_snake, &snake_head) == (usize)-1) {
+    free(new_snake);
+    ERROR_EXIT("Failed to append snake head\n");
   }
+
+  return new_snake;
+}
+
+game_board_col_row game_snake_head_next_col_row(array_list* snake, vec2 direction)
+{
+  game_snake_segment* head = (game_snake_segment*)array_list_get(snake, 0);
+  if(!head) {
+    ERROR_EXIT("Failed to get head of snake\n");
+  }
+  head->board_col_row[0] += direction[0];
+  head->board_col_row[1] += direction[1];
+  if(head->board_col_row[0] >= game_board_cols)
+    head->board_col_row[0] = 0;
+  if(head->board_col_row[1] >= game_board_rows)
+    head->board_col_row[1] = 0;
+
+  return (game_board_col_row) {.col = head->board_col_row[0], .row = head->board_col_row[1]};
 }
 
 void game_snake_draw(array_list* snake)
 {
-  for(usize i = 0; i < array_list_len(snake); i++) {
-    game_snake_segment *segment = array_list_get(snake, i);
-    game_board_draw_cell(segment->board_cell_coordinate, segment->color);
+  game_snake_segment* head = (game_snake_segment*)array_list_get(snake, 0);
+  if(!head) {
+    ERROR_EXIT("Failed to get head of snake\n");
   }
+  render_quad(
+    (vec2){head->board_col_row[0] * game_board_dimension, head->board_col_row[1] * game_board_dimension},
+    (vec2){game_board_dimension, game_board_dimension},
+    head->color
+  );
 }
