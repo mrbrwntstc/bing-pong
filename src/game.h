@@ -14,6 +14,8 @@ extern u32 game_board_dimension;
 extern u32 game_board_cols;
 extern u32 game_board_rows;
 
+void game_board_draw();
+
 #pragma endregion
 
 #pragma region game_snake

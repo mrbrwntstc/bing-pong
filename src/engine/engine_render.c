@@ -7,6 +7,9 @@ static u32 vbo_quad;
 static u32 ebo_quad;
 static u32 shader_default;
 static u32 texture_color;
+static u32 vao_line;
+static u32 vbo_line;
+
 
 #pragma endregion
 
@@ -95,6 +98,24 @@ GLFWwindow* render_init()
   glEnableVertexAttribArray(1);
 
   glBindVertexArray(0);
+  #pragma endregion
+
+  #pragma region render_init_line
+
+  glGenVertexArrays(1, &vao_line);
+  glBindVertexArray(vao_line);
+
+  glGenBuffers(1, &vbo_line);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_line);
+  
+  glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(f32), NULL, GL_DYNAMIC_DRAW);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(f32), (void*)0);
+  glEnableVertexAttribArray(0);
+  
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  glBindVertexArray(0);
+
   #pragma endregion
 
   #pragma region render_init_texture_color
@@ -190,6 +211,44 @@ void render_quad(vec2 pos, vec2 size, vec4 color)
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
   glBindVertexArray(0);
+}
+
+void render_line_segment(vec2 start, vec2 end, vec4 color)
+{
+  glUseProgram(shader_default);
+  glLineWidth(3);
+
+  f32 x = end[0] - start[0];
+  f32 y = end[1] - start[1];
+  f32 line[] = {0, 0, 0, x, y, 0};
+
+  mat4x4 model;
+  mat4x4_translate(model, start[0], start[1], 0.0f);
+
+  glUniformMatrix4fv(glGetUniformLocation(shader_default, "model"), 1, GL_FALSE, &model[0][0]);
+  glUniform4fv(glGetUniformLocation(shader_default, "color"), 1, &color[0]);
+
+  glBindTexture(GL_TEXTURE_2D, texture_color);
+  glBindVertexArray(vao_line);
+
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_line);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(line), line);
+  glDrawArrays(GL_LINES, 0, 2);
+}
+
+void render_quad_line(vec2 pos, vec2 size, vec4 color)
+{
+  vec4 points[4] = {
+    {pos[0], pos[1]},
+    {pos[0] + size[0], pos[1]},
+    {pos[0] + size[0], pos[1] + size[1]},
+    {pos[0], pos[1] + size[1]}
+  };
+
+  render_line_segment(points[0], points[1], color);
+  render_line_segment(points[1], points[2], color);
+  render_line_segment(points[2], points[3], color);
+  render_line_segment(points[3], points[0], color);
 }
 
 void render_begin()

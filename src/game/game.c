@@ -46,6 +46,7 @@ void game_loop()
     
     // draw
     render_begin();
+    // game_board_draw();
     game_snake_draw(snake);
     render_end(game_window);
 

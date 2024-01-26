@@ -67,5 +67,10 @@ void game_snake_draw(array_list* snake)
       (vec2) {game_board_dimension, game_board_dimension},
       segment->color
     );
+    render_quad_line(
+      (vec2) {segment->board_col_row[0] * game_board_dimension, segment->board_col_row[1] * game_board_dimension},
+      (vec2) {game_board_dimension, game_board_dimension},
+      (vec4) {0, 0, 0, 1}
+    );
   }
 }
