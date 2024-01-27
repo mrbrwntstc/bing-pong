@@ -1,6 +1,9 @@
 #ifndef __SNEK_GAME_H__
 #define __SNEK_GAME_H__
 
+#include <time.h>
+#include <stdlib.h>
+
 #include "engine.h"
 
 #pragma region game_board
@@ -29,7 +32,15 @@ typedef struct game_snake_segment_t {
 array_list* game_snake_init();
 void game_snake_grow(array_list* snake);
 void game_snake_move(array_list* snake, vec2 direction);
+game_board_col_row game_snake_peek(array_list* snake, vec2 direction);
 void game_snake_draw(array_list* snake);
+
+#pragma endregion
+
+#pragma region game_apple
+
+game_board_col_row game_apple_respawn(array_list* snake);
+void game_apple_draw(vec2 pos_apple, vec4 color);
 
 #pragma endregion
 

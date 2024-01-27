@@ -3,11 +3,14 @@
 GLFWwindow *game_window;
 
 static array_list *snake;
+static game_board_col_row apple;
 
 void game_init()
 {
+  srand(time(NULL));
   game_window = engine_init();
   snake = game_snake_init();
+  apple = game_apple_respawn(snake);
 }
 
 void game_loop()
@@ -38,16 +41,22 @@ void game_loop()
     move_counter++;
     if(move_counter >= move_period) {
       move_counter = 0;
-      if(engine_input_state.grow) {
+      game_board_col_row snake_next_col_row = game_snake_peek(snake, direction);
+      bool eating = (apple.col == snake_next_col_row.col) && (apple.row == snake_next_col_row.row);
+      if(eating)
         game_snake_grow(snake);
-      }
       game_snake_move(snake, direction);
+      if(eating)
+        apple = game_apple_respawn(snake);
     }
     
     // draw
     render_begin();
     // game_board_draw();
     game_snake_draw(snake);
+    game_apple_draw(
+      (vec2) {apple.col, apple.row},
+      (vec4) {1.0f, 0.0f, 0.0f, 1.0f});
     render_end(game_window);
 
     time_update_late();

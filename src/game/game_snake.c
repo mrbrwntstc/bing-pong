@@ -58,6 +58,16 @@ void game_snake_move(array_list* snake, vec2 direction)
     head->board_col_row[1] = game_board_rows - 1;
 }
 
+
+game_board_col_row game_snake_peek(array_list* snake, vec2 direction)
+{
+  game_snake_segment* head = (game_snake_segment*)array_list_get(snake, 0);
+  return (game_board_col_row) {
+    .col = head->board_col_row[0] + direction[0],
+    .row = head->board_col_row[1] + direction[1]
+  };
+}
+
 void game_snake_draw(array_list* snake)
 {
   for(usize i = 0; i < snake->len; ++i) {
